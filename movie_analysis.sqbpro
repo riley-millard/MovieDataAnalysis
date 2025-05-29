@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="movie_analysis.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1699"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="cleaned_ratings" custom_title="0" dock_id="1" table="4,15:maincleaned_ratings"/><dock_state state="000000ff00000000fd00000001000000020000083b000004f8fc0100000001fb000000160064006f0063006b00420072006f007700730065003101000000000000083b000001dd00ffffff000002690000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="cleaned_ratings" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="45"/><column index="2" value="55"/><column index="3" value="42"/><column index="4" value="159"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="Add Cleaned Ratings Table">CREATE TABLE cleaned_ratings AS
+SELECT 
+    userId, 
+    movieId, 
+    rating,
+    datetime(timestamp, 'unixepoch') AS rating_date
+FROM ratings;</sql><sql name="Join Tables">CREATE TABLE joined_movies AS
+SELECT 
+    m.movieId,
+    m.title AS ml_title,
+    m.genres AS ml_genres,
+    l.imdbId,
+    'tt' || printf('%07d', l.imdbId) AS tconst,
+    b.primaryTitle,
+    b.startYear,
+    b.runtimeMinutes,
+    b.genres AS imdb_genres,
+    r.averageRating,
+    r.numVotes
+FROM movies m
+JOIN links l ON m.movieId = l.movieId
+LEFT JOIN imdb_basics b ON 'tt' || printf('%07d', l.imdbId) = b.tconst
+LEFT JOIN imdb_ratings r ON 'tt' || printf('%07d', l.imdbId) = r.tconst;</sql><sql name="Top Rated Movies">SELECT primaryTitle, averageRating, numVotes
+FROM joined_movies
+WHERE numVotes &gt;= 1000
+ORDER BY averageRating DESC
+LIMIT 10;</sql><sql name="Avg Rating By Genre">SELECT imdb_genres, ROUND(AVG(averageRating), 2) AS avg_rating
+FROM joined_movies
+WHERE numVotes &gt; 500
+GROUP BY imdb_genres
+ORDER BY avg_rating DESC;</sql><sql name="Monthly Rating By Year">SELECT 
+    startYear,
+    COUNT(*) AS num_movies,
+    ROUND(AVG(averageRating), 2) AS avg_rating
+FROM joined_movies
+WHERE startYear IS NOT NULL AND numVotes &gt; 500
+GROUP BY startYear
+ORDER BY startYear;</sql><sql name="Quarterly Rating Activity">SELECT
+  substr(datetime(timestamp, 'unixepoch'), 1, 4) AS year,
+  CASE
+    WHEN CAST(substr(datetime(timestamp, 'unixepoch'), 6, 2) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1'
+    WHEN CAST(substr(datetime(timestamp, 'unixepoch'), 6, 2) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2'
+    WHEN CAST(substr(datetime(timestamp, 'unixepoch'), 6, 2) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3'
+    ELSE 'Q4'
+  END AS quarter,
+  COUNT(*) AS num_ratings
+FROM ratings
+GROUP BY year, quarter
+ORDER BY year, quarter;</sql><current_tab id="5"/></tab_sql></sqlb_project>
