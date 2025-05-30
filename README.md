@@ -12,8 +12,10 @@ The goal was to derive insights about movie popularity, genre preferences, and r
 - SQLite file
 - Tableau Dashboard PDF - Interactive dashboard can be found [here](https://public.tableau.com/app/profile/riley.millard/viz/MovieData_17485299225080/Dashboard1)
 
-## Data Sources
-Source 1 - MovieLens Dataset
-Source 2 - IMDB Datasets
+## Data Source
+Source -  [MovieLens Dataset](https://grouplens.org/datasets/movielens/20m/)
 
 ## Key Findings
+- **User Activity:** Rating activity peaked in the mid-2000s and shows seasonal fluctuations.
+- **Top Titles:** Films like *Forrest Gump, Pulp Fiction*, and *The Shawshank Redemption* dominate engagement.
+- **Rating Trends:** Average ratings have remained relatively stable, with a decline in more recent years.
